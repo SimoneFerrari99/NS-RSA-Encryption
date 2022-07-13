@@ -1,12 +1,9 @@
 from turtle import color
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import AES, PKCS1_OAEP
-from termcolor import colored, cprint
+from termcolor import cprint
 import socket
 import time
-
-slowMode = True
-timer = 1
 
 cprint("############################ BOB ############################", "grey")
 cprint("# Giallo:   Azione svolta da Alice, attesa da parte di Bob  #", "yellow")
@@ -16,13 +13,28 @@ cprint("# Cyano:    Conferma positiva di una azione svolta da Bob   #", "cyan")
 cprint("# Magenta:  Messaggio crittografato/in chiaro               #", "magenta")
 cprint("# Rosso:    Errore                                          #", "red")
 cprint("############################ BOB ############################", "grey")
-cprint("> SlowMode: "+str(slowMode), "grey")
-cprint("> Timer: "+str(timer)+" secondi\n", "grey")
 
+slowMode = False if int(input("Modalità lenta (0/1): ")) == 0 else True
+timer = slowMode and int(input("Timer (1..5): ")) 
+timer = timer if timer >= 0 and timer <= 5 else 0
+withKey = False if int(input("Stampa chiavi (0/1): ")) == 0 else True
+
+cprint("> Modalità lenta: "+str(slowMode), "grey")
+slowMode and cprint("> Timer: "+str(timer)+" secondi", "grey")
+cprint("> Stampa chiavi: "+str(withKey), "grey")
+
+input("\n> Clicca invio per continuare. ")
+
+cprint("> Generazione chiavi di Bob...", "blue")
+slowMode and time.sleep(timer)
 key = RSA.generate(2048)
 Bpvtk = key.export_key()
-
 Bpbk = key.publickey().export_key()
+cprint("  >> Chiavi di Bob generate con successo.", "cyan")
+slowMode and time.sleep(timer)
+withKey and cprint("     >>> %s" % Bpvtk, "grey")
+withKey and cprint("     >>> %s" % Bpbk, "grey")
+
 
 # Crea il socket "stream based" basato sul protocollo TCP ed indirizzi IPv4
 connectionSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -85,8 +97,10 @@ slowMode and time.sleep(timer)
 cprint("  >> Decrypting chiave di sessione con chiave privata di Bob...", "blue")
 slowMode and time.sleep(timer)
 cipher_rsa = PKCS1_OAEP.new(Bpvtk)
+withKey and cprint("     >>> Chiave di sessione crittografata: %s" % enc_session_key, "grey")
 session_key = cipher_rsa.decrypt(enc_session_key)
 cprint("     >>> Chiave di sessione decriptata.", "cyan")
+withKey and cprint("         >>>> Chiave di sessione in chiaro: %s" % session_key, "grey")
 slowMode and time.sleep(timer)
 
 # Decrypt the data with the AES session key

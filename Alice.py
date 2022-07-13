@@ -1,12 +1,9 @@
 from Crypto.PublicKey import RSA
 from Crypto.Random import get_random_bytes
 from Crypto.Cipher import AES, PKCS1_OAEP
-from termcolor import colored, cprint
+from termcolor import cprint
 import socket
 import time
-
-slowMode = True
-timer = 1
 
 cprint("########################### ALICE ###########################", "grey")
 cprint("# Giallo:   Azione svolta da Alice                          #", "yellow")
@@ -16,16 +13,17 @@ cprint("# Cyano:    Ricevuta conferma da Bob, sblocco di Alice      #", "cyan")
 cprint("# Magenta:  Messaggio crittografato/in chiaro               #", "magenta")
 cprint("# Rosso:    Errore                                          #", "red")
 cprint("########################### ALICE ###########################", "grey")
-cprint("> SlowMode: "+str(slowMode), "grey")
-cprint("> Timer: "+str(timer)+" secondi", "grey")
+
+slowMode = False if int(input("Modalità lenta (0/1): ")) == 0 else True
+timer = slowMode and int(input("Timer (1..5): ")) 
+timer = timer if timer >= 0 and timer <= 5 else 0
+withKey = False if int(input("Stampa chiavi (0/1): ")) == 0 else True
+
+cprint("> Modalità lenta: "+str(slowMode), "grey")
+slowMode and cprint("> Timer: "+str(timer)+" secondi", "grey")
+cprint("> Stampa chiavi: "+str(withKey), "grey")
 
 input("\n> Clicca invio per continuare. ")
-
-
-key = RSA.generate(2048)
-Apvtk = key.export_key()
-
-Apbk = key.publickey().export_key()
 
 # Crea il socket "stream based" basato sul protocollo TCP ed indirizzi IPv4
 connectionSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -46,6 +44,7 @@ while not connected:
 cprint("> Attesa chiave pubblica di Bob...", "blue")
 Bpbk = RSA.import_key(connectionSocket.recv(2048))
 cprint("  >> Chiave pubblica di Bob ricevuta.", "cyan")
+withKey and cprint("     >>> %s" % Bpbk, "grey")
 slowMode and time.sleep(timer)
 
 cprint("> Invio conferma ricezione chiave pubblica di Bob...", "yellow")
@@ -58,10 +57,12 @@ slowMode and time.sleep(timer)
 # Encrypt the session key with the public RSA key
 cprint("> Encrypting della chiave di sessione con la chiave pubblica di Bob...", "yellow")
 slowMode and time.sleep(timer)
-session_key = get_random_bytes(16)
+session_key = get_random_bytes(32)
+withKey and cprint("  >> Chiave di sessione in chiaro: %s" % session_key, "grey")
 cipher_rsa = PKCS1_OAEP.new(Bpbk)
 enc_session_key = cipher_rsa.encrypt(session_key)
 cprint("  >> Encrypt della chiave completato con successo.", "green")
+withKey and cprint("     >>> Chiave di sessione crittografata: %s" % enc_session_key, "grey")
 slowMode and time.sleep(timer)
 
 cprint("> Inizio fase scrittura messaggio crittografato...", "yellow")
