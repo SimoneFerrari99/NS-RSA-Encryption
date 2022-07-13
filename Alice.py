@@ -5,6 +5,7 @@ from termcolor import cprint
 import socket
 import time
 
+# Legenda colori
 cprint("########################### ALICE ###########################", "grey")
 cprint("# Giallo:   Azione svolta da Alice                          #", "yellow")
 cprint("# Verde:    Conferma positiva di una azione svolta da Alice #", "green")
@@ -14,6 +15,7 @@ cprint("# Magenta:  Messaggio crittografato/in chiaro               #", "magenta
 cprint("# Rosso:    Errore                                          #", "red")
 cprint("########################### ALICE ###########################", "grey")
 
+# Impostazioni di esecuzione
 slowMode = False if int(input("Modalità lenta (0/1): ")) == 0 else True
 timer = slowMode and int(input("Timer (1..5): ")) 
 timer = timer if timer >= 0 and timer <= 5 else 0
@@ -47,14 +49,14 @@ cprint("  >> Chiave pubblica di Bob ricevuta.", "cyan")
 withKey and cprint("     >>> %s" % Bpbk, "grey")
 slowMode and time.sleep(timer)
 
+# Invio conferma di avvenuta ricezione della chiave pubblica di Bob
 cprint("> Invio conferma ricezione chiave pubblica di Bob...", "yellow")
 slowMode and time.sleep(timer)
 connectionSocket.send("OK".encode("utf-8"))
 cprint("  >> Conferma inviata con successo.", "green")
 slowMode and time.sleep(timer)
 
-
-# Encrypt the session key with the public RSA key
+# Generazione chiave AES di sessione ed encrypting con RSA
 cprint("> Encrypting della chiave di sessione con la chiave pubblica di Bob...", "yellow")
 slowMode and time.sleep(timer)
 session_key = get_random_bytes(32)
@@ -65,20 +67,21 @@ cprint("  >> Encrypt della chiave completato con successo.", "green")
 withKey and cprint("     >>> Chiave di sessione crittografata: %s" % enc_session_key, "grey")
 slowMode and time.sleep(timer)
 
+# Inserimento messaggio da inviare a Bob
 cprint("> Inizio fase scrittura messaggio crittografato...", "yellow")
 slowMode and time.sleep(timer)
 data = input("> Inserisci il messaggio da inviare a Bob \n  >> ")
 cprint("  >> Messaggio in chiaro: %s" % data, "magenta")
 slowMode and time.sleep(timer)
 
+# Apertura del file su cui scrivere il messaggio
 cprint("  >> Apertura file [encrypted_data.bin]...", "yellow")
 slowMode and time.sleep(timer)
 file_out = open("encrypted_data.bin", "wb")
 cprint("     >>> File [encrypted_data.bin] aperto.", "green")
 slowMode and time.sleep(timer)
 
-
-# Encrypt the data with the AES session key
+# Encrypting del messaggio con la chiave di sessione generata e l'algoritmo AES
 cprint("  >> Encripting del messaggio da scrivere...", "yellow")
 slowMode and time.sleep(timer)
 cipher_aes = AES.new(session_key, AES.MODE_EAX)
@@ -88,24 +91,28 @@ slowMode and time.sleep(timer)
 cprint("         >>>> Messaggio crittografato: %s" % ciphertext, "magenta")
 slowMode and time.sleep(timer)
 
+# Scrittura del messaggio crittografato e della chiave di sessione crittografata
 cprint("  >> Scrittura del messaggio crittografato...", "yellow")
 slowMode and time.sleep(timer)
 [ file_out.write(x) for x in (enc_session_key, cipher_aes.nonce, tag, ciphertext) ]
 cprint("     >>> Scrittura completata con successo.", "green")
 slowMode and time.sleep(timer)
 
+# Chiusura file di scrittura
 cprint("  >> Chiusura file [encrypted_data.bin]...", "yellow")
 slowMode and time.sleep(timer)
 file_out.close()
 cprint("     >>> File [encrypted_data.bin] chiuso.", "green")
 slowMode and time.sleep(timer)
 
+# Invio conferma a Bob di avvenuta scrittura
 cprint("> Invio conferma terminazione scrittura messaggio crittografato...", "yellow")
 slowMode and time.sleep(timer)
 connectionSocket.send("END".encode("utf-8"))
 cprint("  >> Conferma inviata con successo.","green")
 slowMode and time.sleep(timer)
 
+# Chiusura connessione con Bob
 cprint("> Chiusura connessione...", "yellow")
 slowMode and time.sleep(timer)
 connectionSocket.close()
