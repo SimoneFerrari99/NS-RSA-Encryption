@@ -1,82 +1,105 @@
+from turtle import color
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import AES, PKCS1_OAEP
+from termcolor import colored, cprint
 import socket
 import time
 
-# import hashlib
+slowMode = True
+timer = 1
+
+cprint("############################ BOB ############################", "grey")
+cprint("# Giallo:   Azione svolta da Alice, attesa da parte di Bob  #", "yellow")
+cprint("# Verde:    Ricevuta conferma da Alice, sblocco di Bob      #", "green")
+cprint("# Blu:      Azione svolta da Bob                            #", "blue")
+cprint("# Cyano:    Conferma positiva di una azione svolta da Bob   #", "cyan")
+cprint("# Magenta:  Messaggio crittografato/in chiaro               #", "magenta")
+cprint("# Rosso:    Errore                                          #", "red")
+cprint("############################ BOB ############################", "grey")
+cprint("> SlowMode: "+str(slowMode), "grey")
+cprint("> Timer: "+str(timer)+" secondi\n", "grey")
 
 key = RSA.generate(2048)
 Bpvtk = key.export_key()
 
 Bpbk = key.publickey().export_key()
 
-
-bobSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# Crea il socket "stream based" basato sul protocollo TCP ed indirizzi IPv4
+connectionSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Binding del socket e attesa di connessione da parte del client
-bobSocket.bind(("127.0.0.1",9090))
-print("> In attesa di connessione...")
-bobSocket.listen()
+connectionSocket.bind(("127.0.0.1",9090))
+cprint("> In attesa di connessione...", "yellow")
+connectionSocket.listen()
 
 # Avvenuta connessione da parte del processo client
-(clientConnected, clientAddress) = bobSocket.accept()
-print("  >> Client connesso. (%s:%s)" % (clientAddress[0], clientAddress[1]))
+(aliceConnection, aliceAddress) = connectionSocket.accept()
+cprint("  >> Client connesso. (%s:%s)" % (aliceAddress[0], aliceAddress[1]), "green")
 
 # Invio chiave pubblica di Bob
-print("> Invio chiave pubblica di Bob al client...")
-clientConnected.send(Bpbk)
-print( "  >> Chiave pubblica di Bob inviata." )
+cprint("> Invio chiave pubblica di Bob ad Alice...", "blue")
+slowMode and time.sleep(timer)
+aliceConnection.send(Bpbk)
+cprint("  >> Chiave pubblica di Bob inviata con successo.", "cyan")
+slowMode and time.sleep(timer)
 
-print("> Attesa conferma ricezione chiave pubblica di Bob...")
-response = clientConnected.recv(2048).decode("utf-8")
-print( "  >> Conferma ricezione chiave pubblica di Bob ricevuta." )
+cprint("     >>> Attesa conferma ricezione chiave pubblica di Bob da parte di Alice...", "yellow")
+slowMode and time.sleep(timer)
+response = aliceConnection.recv(2048).decode("utf-8")
 
 if response == "OK":
-    print("     >> Chiave pubblica di Bob inviata correttamente.")
+    cprint("         >>>> Conferma ricevuta con successo.", "green")
+    slowMode and time.sleep(timer)
 else:
-    print("     >> Chiave pubblica di Bob inviata con errore.")
+    cprint("         >>>> ERRORE: la chiave pubblica di Bob non è stata ricevuta correttamente da Alice.", "red")
     exit()
 
-print("> Attesa conferma terminazione scrittura messaggio crittografato...")
-endWriting = clientConnected.recv(2048).decode("utf-8")
+cprint("> Alice sta scrivendo il messaggio crittografato...", "yellow")
+slowMode and time.sleep(timer)
+endWriting = aliceConnection.recv(2048).decode("utf-8")
 
 if endWriting == "END":
-    print("  >> Ricevuto messaggio di fine scrittura correttamente.")
-    bobSocket.close()
-    print("     >> Connessione chiusa.")
+    cprint("  >> Alice ha finito di scrivere il messaggio.", "green")
+    slowMode and time.sleep(timer)
+    connectionSocket.close()
+    cprint("     >>> Connessione chiusa.", "green")
+    slowMode and time.sleep(timer)
 else:
-    print("  >> Ricevuto messaggio di fine scrittura con errore.")
+    cprint("  >> ERRORE: Alice non è riuscita a scrivere il messaggio.", "red")
     exit()
 
-print("> Inizio lettura messaggio crittografato. Apertura file [encrypted_data.bin]...")
+cprint("> Inizio lettura messaggio crittografato. Apertura file [encrypted_data.bin]...", "blue")
+slowMode and time.sleep(timer)
 file_in = open("encrypted_data.bin", "rb")
-time.sleep(1)
-print("  >> File [encrypted_data.bin] aperto.")
+cprint("  >> File [encrypted_data.bin] aperto.", "cyan")
+slowMode and time.sleep(timer)
 
-time.sleep(3)
 Bpvtk = RSA.import_key(Bpvtk)
 enc_session_key, nonce, tag, ciphertext = [ file_in.read(x) for x in (Bpvtk.size_in_bytes(), 16, 16, -1) ]
-print("  >> Contenuto file [encrypted_data.bin] letto.")
-print("     >> Dati crittografati: %s" % ciphertext)
+cprint("     >>> Contenuto file [encrypted_data.bin] letto.", "cyan")
+slowMode and time.sleep(timer)
+cprint("         >>>> Messaggio crittografato: %s" % ciphertext, "magenta")
+slowMode and time.sleep(timer)
 
-time.sleep(1)
 # Decrypt the session key with the private RSA key
-print("  >> Decriptazione chiave di sessione con chiave privata di Bob...")
-time.sleep(2)
+cprint("  >> Decrypting chiave di sessione con chiave privata di Bob...", "blue")
+slowMode and time.sleep(timer)
 cipher_rsa = PKCS1_OAEP.new(Bpvtk)
 session_key = cipher_rsa.decrypt(enc_session_key)
-print("     >> Chiave di sessione decriptata.")
+cprint("     >>> Chiave di sessione decriptata.", "cyan")
+slowMode and time.sleep(timer)
 
-time.sleep(1)
 # Decrypt the data with the AES session key
-print("  >> Decriptazione dati con chiave di sessione...")
-time.sleep(2)
+cprint("  >> Decrypting messaggio con chiave di sessione...", "blue")
+slowMode and time.sleep(timer)
 cipher_aes = AES.new(session_key, AES.MODE_EAX, nonce)
 data = cipher_aes.decrypt_and_verify(ciphertext, tag)
-print("     >> Dati decriptati.")
+cprint("     >>> Messaggio decriptato.", "cyan")
+slowMode and time.sleep(timer)
 
-print("> Dati decriptati: %s" % data.decode("utf-8"))
+cprint("         >>>> Messaggio in chiaro: %s" % data.decode("utf-8"), "magenta")
+slowMode and time.sleep(timer)
 
-time.sleep(1)
+cprint("  >> Chiusura file [encrypted_data.bin]...", "blue")
 file_in.close()
-print("  >> File [encrypted_data.bin] chiuso.")
+cprint("     >>> File [encrypted_data.bin] chiuso.", "cyan")
