@@ -122,5 +122,6 @@ slowMode and time.sleep(timer)
 
 # Chiusura del file
 cprint("  >> Chiusura file [encrypted_data.bin]...", "blue")
+slowMode and time.sleep(timer)
 inputFile.close()
 cprint("     >>> File [encrypted_data.bin] chiuso.", "cyan")
