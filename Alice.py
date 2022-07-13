@@ -59,12 +59,12 @@ slowMode and time.sleep(timer)
 # Generazione chiave AES di sessione ed encrypting con RSA
 cprint("> Encrypting della chiave di sessione con la chiave pubblica di Bob...", "yellow")
 slowMode and time.sleep(timer)
-session_key = get_random_bytes(32)
-withKey and cprint("  >> Chiave di sessione in chiaro: %s" % session_key, "grey")
-cipher_rsa = PKCS1_OAEP.new(Bpbk)
-enc_session_key = cipher_rsa.encrypt(session_key)
+sessionKey = get_random_bytes(32)
+withKey and cprint("  >> Chiave di sessione in chiaro: %s" % sessionKey, "grey")
+rsa = PKCS1_OAEP.new(Bpbk)
+encryptedSessionKey = rsa.encrypt(sessionKey)
 cprint("  >> Encrypt della chiave completato con successo.", "green")
-withKey and cprint("     >>> Chiave di sessione crittografata: %s" % enc_session_key, "grey")
+withKey and cprint("     >>> Chiave di sessione crittografata: %s" % encryptedSessionKey, "grey")
 slowMode and time.sleep(timer)
 
 # Inserimento messaggio da inviare a Bob
@@ -77,15 +77,15 @@ slowMode and time.sleep(timer)
 # Apertura del file su cui scrivere il messaggio
 cprint("  >> Apertura file [encrypted_data.bin]...", "yellow")
 slowMode and time.sleep(timer)
-file_out = open("encrypted_data.bin", "wb")
+outputFile = open("encrypted_data.bin", "wb")
 cprint("     >>> File [encrypted_data.bin] aperto.", "green")
 slowMode and time.sleep(timer)
 
 # Encrypting del messaggio con la chiave di sessione generata e l'algoritmo AES
 cprint("  >> Encripting del messaggio da scrivere...", "yellow")
 slowMode and time.sleep(timer)
-cipher_aes = AES.new(session_key, AES.MODE_EAX)
-ciphertext, tag = cipher_aes.encrypt_and_digest(data.encode("utf-8"))
+aes = AES.new(sessionKey, AES.MODE_EAX)
+ciphertext, tag = aes.encrypt_and_digest(data.encode("utf-8"))
 cprint("     >>> Encrypt del messaggio completato con successo.", "green")
 slowMode and time.sleep(timer)
 cprint("         >>>> Messaggio crittografato: %s" % ciphertext, "magenta")
@@ -94,14 +94,14 @@ slowMode and time.sleep(timer)
 # Scrittura del messaggio crittografato e della chiave di sessione crittografata
 cprint("  >> Scrittura del messaggio crittografato...", "yellow")
 slowMode and time.sleep(timer)
-[ file_out.write(x) for x in (enc_session_key, cipher_aes.nonce, tag, ciphertext) ]
+[ outputFile.write(x) for x in (encryptedSessionKey, aes.nonce, tag, ciphertext) ]
 cprint("     >>> Scrittura completata con successo.", "green")
 slowMode and time.sleep(timer)
 
 # Chiusura file di scrittura
 cprint("  >> Chiusura file [encrypted_data.bin]...", "yellow")
 slowMode and time.sleep(timer)
-file_out.close()
+outputFile.close()
 cprint("     >>> File [encrypted_data.bin] chiuso.", "green")
 slowMode and time.sleep(timer)
 

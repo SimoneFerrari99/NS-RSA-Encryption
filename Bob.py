@@ -87,13 +87,13 @@ else:
 # Inizio lettura del messaggio e apertura del file
 cprint("> Inizio lettura messaggio crittografato. Apertura file [encrypted_data.bin]...", "blue")
 slowMode and time.sleep(timer)
-file_in = open("encrypted_data.bin", "rb")
+inputFile = open("encrypted_data.bin", "rb")
 cprint("  >> File [encrypted_data.bin] aperto.", "cyan")
 slowMode and time.sleep(timer)
 
 # Recupero chiave di sessione crittografata e del testo crittografato
 Bpvtk = RSA.import_key(Bpvtk)
-enc_session_key, nonce, tag, ciphertext = [ file_in.read(x) for x in (Bpvtk.size_in_bytes(), 16, 16, -1) ]
+encryptedSessionKey, nonce, tag, ciphertext = [ inputFile.read(x) for x in (Bpvtk.size_in_bytes(), 16, 16, -1) ]
 cprint("     >>> Contenuto file [encrypted_data.bin] letto.", "cyan")
 slowMode and time.sleep(timer)
 cprint("         >>>> Messaggio crittografato: %s" % ciphertext, "magenta")
@@ -102,18 +102,18 @@ slowMode and time.sleep(timer)
 # Decrittazione della chiave di sessione con la chiave privata di Bob e algoritmo RSA
 cprint("  >> Decrypting chiave di sessione con chiave privata di Bob...", "blue")
 slowMode and time.sleep(timer)
-cipher_rsa = PKCS1_OAEP.new(Bpvtk)
-withKey and cprint("     >>> Chiave di sessione crittografata: %s" % enc_session_key, "grey")
-session_key = cipher_rsa.decrypt(enc_session_key)
+rsa = PKCS1_OAEP.new(Bpvtk)
+withKey and cprint("     >>> Chiave di sessione crittografata: %s" % encryptedSessionKey, "grey")
+sessionKey = rsa.decrypt(encryptedSessionKey)
 cprint("     >>> Chiave di sessione decriptata.", "cyan")
-withKey and cprint("         >>>> Chiave di sessione in chiaro: %s" % session_key, "grey")
+withKey and cprint("         >>>> Chiave di sessione in chiaro: %s" % sessionKey, "grey")
 slowMode and time.sleep(timer)
 
 # Decrittazione del messaggio con la chiave di sessione e algoritmo AES
 cprint("  >> Decrypting messaggio con chiave di sessione...", "blue")
 slowMode and time.sleep(timer)
-cipher_aes = AES.new(session_key, AES.MODE_EAX, nonce)
-data = cipher_aes.decrypt_and_verify(ciphertext, tag)
+aes = AES.new(sessionKey, AES.MODE_EAX, nonce)
+data = aes.decrypt_and_verify(ciphertext, tag)
 cprint("     >>> Messaggio decriptato.", "cyan")
 slowMode and time.sleep(timer)
 
@@ -122,5 +122,5 @@ slowMode and time.sleep(timer)
 
 # Chiusura del file
 cprint("  >> Chiusura file [encrypted_data.bin]...", "blue")
-file_in.close()
+inputFile.close()
 cprint("     >>> File [encrypted_data.bin] chiuso.", "cyan")
