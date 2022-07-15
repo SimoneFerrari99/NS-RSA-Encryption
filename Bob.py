@@ -1,9 +1,8 @@
-from turtle import color
-from Crypto.PublicKey import RSA
-from Crypto.Cipher import AES, PKCS1_OAEP
-from termcolor import cprint
-import socket
-import time
+from Crypto.PublicKey import RSA            # Algoritmo RSA
+from Crypto.Cipher import AES, PKCS1_OAEP   # Algoritmo AES
+from termcolor import cprint                # Printing colorato
+import socket                               # Socket per comunicazione Alice-Bob
+import time                                 # Introdurre delay fittizzi di esecuzione
 
 # Legenda colori
 cprint("############################ BOB ############################", "grey")
