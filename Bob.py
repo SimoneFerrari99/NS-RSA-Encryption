@@ -85,16 +85,16 @@ else:
     exit()
 
 # Inizio lettura del messaggio e apertura del file
-cprint("> Inizio lettura messaggio crittografato. Apertura file [encrypted_data.bin]...", "blue")
+cprint("> Inizio lettura messaggio crittografato. Apertura file [encryptedMessage.bin]...", "blue")
 slowMode and time.sleep(timer)
-inputFile = open("encrypted_data.bin", "rb")
-cprint("  >> File [encrypted_data.bin] aperto.", "cyan")
+inputFile = open("encryptedMessage.bin", "rb")
+cprint("  >> File [encryptedMessage.bin] aperto.", "cyan")
 slowMode and time.sleep(timer)
 
 # Recupero chiave di sessione crittografata e del testo crittografato
 Bpvtk = RSA.import_key(Bpvtk)
 encryptedSessionKey, nonce, tag, ciphertext = [ inputFile.read(x) for x in (Bpvtk.size_in_bytes(), 16, 16, -1) ]
-cprint("     >>> Contenuto file [encrypted_data.bin] letto.", "cyan")
+cprint("     >>> Contenuto file [encryptedMessage.bin] letto.", "cyan")
 slowMode and time.sleep(timer)
 cprint("         >>>> Messaggio crittografato: %s" % ciphertext, "magenta")
 slowMode and time.sleep(timer)
@@ -121,7 +121,7 @@ cprint("         >>>> Messaggio in chiaro: %s" % data.decode("utf-8"), "magenta"
 slowMode and time.sleep(timer)
 
 # Chiusura del file
-cprint("  >> Chiusura file [encrypted_data.bin]...", "blue")
+cprint("  >> Chiusura file [encryptedMessage.bin]...", "blue")
 slowMode and time.sleep(timer)
 inputFile.close()
-cprint("     >>> File [encrypted_data.bin] chiuso.", "cyan")
+cprint("     >>> File [encryptedMessage.bin] chiuso.", "cyan")

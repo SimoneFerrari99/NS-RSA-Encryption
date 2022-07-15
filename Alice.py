@@ -75,10 +75,10 @@ cprint("  >> Messaggio in chiaro: %s" % data, "magenta")
 slowMode and time.sleep(timer)
 
 # Apertura del file su cui scrivere il messaggio
-cprint("  >> Apertura file [encrypted_data.bin]...", "yellow")
+cprint("  >> Apertura file [encryptedMessage.bin]...", "yellow")
 slowMode and time.sleep(timer)
-outputFile = open("encrypted_data.bin", "wb")
-cprint("     >>> File [encrypted_data.bin] aperto.", "green")
+outputFile = open("encryptedMessage.bin", "wb")
+cprint("     >>> File [encryptedMessage.bin] aperto.", "green")
 slowMode and time.sleep(timer)
 
 # Encrypting del messaggio con la chiave di sessione generata e l'algoritmo AES
@@ -99,10 +99,10 @@ cprint("     >>> Scrittura completata con successo.", "green")
 slowMode and time.sleep(timer)
 
 # Chiusura file di scrittura
-cprint("  >> Chiusura file [encrypted_data.bin]...", "yellow")
+cprint("  >> Chiusura file [encryptedMessage.bin]...", "yellow")
 slowMode and time.sleep(timer)
 outputFile.close()
-cprint("     >>> File [encrypted_data.bin] chiuso.", "green")
+cprint("     >>> File [encryptedMessage.bin] chiuso.", "green")
 slowMode and time.sleep(timer)
 
 # Invio conferma a Bob di avvenuta scrittura
